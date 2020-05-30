@@ -28,6 +28,8 @@ bool Loader::load(std::string filename) {
 bool Loader::load(std::istream& is, std::string filename) {
     assert(is.good());
 
+	std::cout << "SDFLoader: loading " << filename << std::endl;
+
     //Update the filename for location references
     filename_ = filename;
 

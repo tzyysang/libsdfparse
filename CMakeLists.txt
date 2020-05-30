@@ -95,7 +95,7 @@ foreach(flag ${WARN_FLAGS_TO_CHECK})
 endforeach()
 
 #Apply the warning flags to all build types
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_FLAGS} -O2")
 
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 

@@ -12,110 +12,16 @@ namespace /*anonymous*/ {
 }
 namespace sdfparse {
 
-
-    void DelayFile::print(std::ostream& os, int depth) const {
-        os << ident(depth) << "(DELAYFILE\n";
-
-        header().print(os, depth+1);
-
-        for(auto& cell : cells()) {
-            cell.print(os, depth+1);
-        }
-        os << ident(depth) << ")\n";
-        
-    }
-
-    void Header::print(std::ostream& os, int depth) const {
-        os << ident(depth) << "(SDFVERSION \"" << sdfversion() << "\")\n";
-        os << ident(depth) << "(DESIGN \"" << design() << "\")\n";
-        os << ident(depth) << "(VENDOR \"" << vendor() << "\")\n";
-        os << ident(depth) << "(PROGRAM \"" << program() << "\")\n";
-        os << ident(depth) << "(VERSION \"" << version() << "\")\n";
-        os << ident(depth) << "(DIVIDER " << divider() << ")\n";
-        timescale().print(os, depth);
-    }
-
-    void Timescale::print(std::ostream& os, int depth) const {
-        os << ident(depth) << "(TIMESCALE " << value() << " " << unit() << ")\n";
-    }
-
-    void Cell::print(std::ostream& os, int depth) const {
-        os << ident(depth) << "(CELL\n";
-        os << ident(depth+1) << "(CELLTYPE \"" << escape_sdf_identifier(celltype()) << "\")\n";
-        os << ident(depth+1) << "(INSTANCE " << escape_sdf_identifier(instance()) << ")\n";
-        delay().print(os, depth+1);
-        timing_check().print(os, depth+1);
-        os << ident(depth) << ")\n";
-    }
-
-    void Delay::print(std::ostream& os, int depth) const {
-        if(!iopaths_.empty()) {
-            os << ident(depth) << "(DELAY\n";
-            os << ident(depth+1) << "(" << type() << "\n";
-            for(auto& iopath : iopaths()) {
-                iopath.print(os, depth+2);
-            }
-            os << ident(depth+1) << ")\n";
-            os << ident(depth) << ")\n";
-        }
-    }
-
-    void Timing::print(std::ostream& os, int depth) const {
-        os << ident(depth) << type() << port() << " " << clock() << " " << t() << ")\n";
-    }
-
-    void TimingCheck::print(std::ostream& os, int depth) const {
-        if(!timing().empty()) {
-            os << ident(depth) << "(TIMINGCHECK\n";
-            for(auto& timing_check : timing()) {
-                timing_check.print(os, depth+1);
-            }
-            os << ident(depth) << ")\n";
-        }
-    }
-
-    std::ostream& operator<<(std::ostream& os, const Delay::Type& type) {
-        if(type == Delay::Type::ABSOLUTE) {
-            os << "ABSOLUTE";
-        } else {
-            assert(false);
-        }
-        return os;
-    }
-
-    void Iopath::print(std::ostream& os, int depth) const {
-        os << ident(depth) << "(IOPATH " << input() << " " << output() << " " << rise() << " " << fall() << ")\n";
-    }
-
-    std::ostream& operator<<(std::ostream& os, const RealTriple& val) {
-        if(std::isnan(val.min()) && std::isnan(val.typ()) && std::isnan(val.max())) {
-            os << "()";
-        } else {
-            os << "(" << val.min() << ":" << val.typ() << ":" << val.max() << ")";
-        }
-        return os;
-    }
-    bool operator==(const RealTriple& lhs, const RealTriple& rhs) {
-        return lhs.min() == rhs.min() && lhs.typ() == rhs.typ() && lhs.max() == rhs.max();
-    }
-
-    std::ostream& operator<<(std::ostream& os, const PortSpec& port_spec) {
-        if(port_spec.condition() != PortCondition::NONE) {
-            os << "(" << port_spec.condition() << " ";
-        }
-        os << escape_sdf_identifier(port_spec.port(), EscapeStyle::EXCLUDE_LAST_INDEX);
-        if(port_spec.condition() != PortCondition::NONE) {
-            os << ")";
-        }
-        return os;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const PortCondition& val) {
-        if(val == PortCondition::POSEDGE) os << "posedge";
-        else if (val == PortCondition::NEGEDGE) os << "negedge";
-        else if (val == PortCondition::NONE) os << "none";
-        else assert(false);
-        return os;
-    }
+	void DelayFile::report_information(std::ostream& os) {
+		
+		int num_cell = 0;
+		for( Cell* cell : cells() ){
+			++num_cell;
+		}
+			
+		os << "======== SDF information ========" << std::endl;
+		os << "No. of cell:      " << num_cell << std::endl;
+		os << "=================================" << std::endl;
+	}
 
 } //sdfparse

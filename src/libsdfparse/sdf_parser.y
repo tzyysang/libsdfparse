@@ -140,7 +140,7 @@
 %type <Timing> hold_check
 %type <Timing> removal_check
 %type <Timing> recovery_check
-%type <Cell> cell
+%type <Cell*> cell
 %type <Timescale> timescale
 %type <std::string> hierarchy_divider
 %type <std::string> version
@@ -148,8 +148,8 @@
 %type <std::string> vendor
 %type <std::string> design
 %type <std::string> sdf_version
-%type <Header> sdf_header
-%type <std::vector<Cell>> cell_list
+%type <Header*> sdf_header
+%type <std::vector< Cell* >*> cell_list
 %type <DelayFile> sdf_file
 
 %type <std::string> date
@@ -161,25 +161,38 @@
 %start sdf_file
 
 %%
-sdf_file : LPAR DELAYFILE sdf_header RPAR { driver.delayfile_ = DelayFile($3); }
-         | LPAR DELAYFILE sdf_header cell_list RPAR { driver.delayfile_ = DelayFile($3, $4); }
+sdf_file : LPAR DELAYFILE sdf_header RPAR { 
+
+			DelayFile * new_df = new DelayFile();
+			new_df->set_header( $3 );
+			
+			driver.delayfile_ = new_df; 
+		 }
+         | LPAR DELAYFILE sdf_header cell_list RPAR {
+		 
+			DelayFile * new_df = new DelayFile();
+			new_df->set_header( $3 );
+			new_df->set_cells( $4 );
+			
+			driver.delayfile_ = new_df; 
+		 }
          ;
 
-sdf_header : sdf_version                    { $$ = Header($1); }
-           | sdf_header design              { $1.set_design($2); $$ = $1; }
-           | sdf_header vendor              { $1.set_vendor($2); $$ = $1; }
-           | sdf_header program             { $1.set_program($2); $$ = $1; }
-           | sdf_header version             { $1.set_version($2); $$ = $1; }
-           | sdf_header hierarchy_divider   { $1.set_divider($2); $$ = $1; }
-           | sdf_header timescale           { $1.set_timescale($2); $$ = $1; }
+sdf_header : sdf_version                    { $$ = new Header($1); }
+           | sdf_header design              { $1->set_design($2); $$ = $1; }
+           | sdf_header vendor              { $1->set_vendor($2); $$ = $1; }
+           | sdf_header program             { $1->set_program($2); $$ = $1; }
+           | sdf_header version             { $1->set_version($2); $$ = $1; }
+           | sdf_header hierarchy_divider   { $1->set_divider($2); $$ = $1; }
+           | sdf_header timescale           { $1->set_timescale($2); $$ = $1; }
            | sdf_header date              	{ $$ = $1; }
            | sdf_header voltage            	{ $$ = $1; }
            | sdf_header process            	{ $$ = $1; }
            | sdf_header temperature         { $$ = $1; }
            ;
 
-cell_list : cell { $$ = std::vector<Cell>(); $$.push_back($1); }
-          | cell_list cell  { $1.push_back($2); $$ = $1; }
+cell_list : cell { $$ = new std::vector<Cell*>(); $$->push_back( $1 ); }
+          | cell_list cell  { $1->push_back( $2 ); $$ = $1; }
           ;
 
 sdf_version : LPAR SDFVERSION Qid RPAR { $$ = $3; }
@@ -216,10 +229,10 @@ process : LPAR PROCESS Qid RPAR { $$ = $3; }
 temperature : LPAR TEMPERATURE real_triple RPAR { $$ = RealTriple($3); }
 			;
 
-cell : LPAR CELL celltype instance timing_check RPAR { $$ = Cell($3, $4, Delay(), $5); }
-     | LPAR CELL celltype instance delay RPAR { $$ = Cell($3, $4, $5, TimingCheck()); }
-     | LPAR CELL celltype instance RPAR { $$ = Cell($3, $4, Delay(), TimingCheck()); }
-     | LPAR CELL celltype instance delay timing_check RPAR { $$ = Cell($3, $4, Delay(), TimingCheck()); }
+cell : LPAR CELL celltype instance timing_check RPAR { $$ = new Cell($3, $4, Delay(), $5); }
+     | LPAR CELL celltype instance delay RPAR { $$ = new Cell($3, $4, $5, TimingCheck()); }
+     | LPAR CELL celltype instance RPAR { $$ = new Cell($3, $4, Delay(), TimingCheck()); }
+     | LPAR CELL celltype instance delay timing_check RPAR { $$ = new Cell($3, $4, Delay(), TimingCheck()); }
      ;
 
 celltype : LPAR CELLTYPE Qid RPAR { $$ = $3; }

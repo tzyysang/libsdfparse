@@ -41,15 +41,11 @@ namespace sdfparse {
             double max() const { return max_; }
             double typ() const { return typ_; }
 
-            void print(std::ostream& os, int depth=0) const;
-
         private:
             double min_;
             double typ_;
             double max_;
     };
-    std::ostream& operator<<(std::ostream& os, const RealTriple& val);
-    bool operator==(const RealTriple& lhs, const RealTriple& rhs);
 
     enum class PortCondition {
         POSEDGE,
@@ -73,7 +69,6 @@ namespace sdfparse {
             std::string port_;
             PortCondition condition_;
     };
-    std::ostream& operator<<(std::ostream& os, const PortSpec& val);
 
 
     //An IOPATH delcaration
@@ -118,7 +113,6 @@ namespace sdfparse {
             RealTriple t() const { return t_; }
             const std::string& type() const { return type_; }
 
-            void print(std::ostream& os, int depth=0) const;
         private:
             PortSpec clock_;
             PortSpec port_;
@@ -167,7 +161,6 @@ namespace sdfparse {
 
             std::vector<Timing> timing() const { return timing_checks_; }
 
-            void print(std::ostream& os, int depth=0) const;
         private:
             std::vector<Timing> timing_checks_;
     };
@@ -190,12 +183,10 @@ namespace sdfparse {
             Delay::Type type() const { return type_; }
             const std::vector<Iopath>& iopaths() const { return iopaths_; }
 
-            void print(std::ostream& os, int depth=0) const;
         private:
             Delay::Type type_;
             std::vector<Iopath> iopaths_;
     };
-    std::ostream& operator<<(std::ostream& os, const Delay::Type& type);
 
     //A CELL definition
     //
@@ -236,7 +227,6 @@ namespace sdfparse {
             double value() const { return value_; }
             const std::string& unit() const { return unit_; }
 
-            void print(std::ostream& os, int depth=0) const;
         private:
             double value_;
             std::string unit_;
@@ -268,7 +258,6 @@ namespace sdfparse {
             void set_divider(const std::string& new_divider) { divider_ = new_divider; }
             void set_timescale(const Timescale& new_timescale) { timescale_ = new_timescale; }
 
-            void print(std::ostream& os, int depth=0) const;
         private:
             std::string sdfversion_;
             std::string design_;
@@ -286,17 +275,21 @@ namespace sdfparse {
     //Organized as a header(), and list of cells().
     class DelayFile {
         public:
-            DelayFile(const Header& new_header=Header(), const std::vector<Cell>& new_cells=std::vector<Cell>())
-                : header_(new_header)
-                , cells_(new_cells)
+            DelayFile()
+                : header_(nullptr)
+                , cells_(nullptr)
                 {}
 
-            const Header& header() const { return header_; }
-            const std::vector<Cell>& cells() const { return cells_; }
-
-            void print(std::ostream& os, int depth=0) const;
+            Header& header() { return *header_; }
+            std::vector< Cell* >& cells() { return *cells_; }
+			
+			void set_header(Header* header) { header_ = header; };
+			void set_cells(std::vector< Cell* >* cells) { cells_ = cells; };
+			
+			void report_information(std::ostream& os);
+			
         private:
-            Header header_;
-            std::vector<Cell> cells_;
+            Header* header_;
+            std::vector< Cell* >* cells_;
     };
 }

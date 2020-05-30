@@ -30,7 +30,7 @@ class Loader {
         bool load(std::string filename);
         bool load(std::istream& is, std::string filename="<inputstream>");
 
-        const DelayFile& get_delayfile() { return delayfile_; };
+        DelayFile& get_delayfile() { return *delayfile_; };
 
     protected:
         virtual void on_error(ParseError& error);
@@ -41,7 +41,7 @@ class Loader {
         std::unique_ptr<Lexer> lexer_;
         std::unique_ptr<Parser> parser_;
 
-        DelayFile delayfile_;
+        DelayFile* delayfile_;
 };
 
 } //sdfparse
