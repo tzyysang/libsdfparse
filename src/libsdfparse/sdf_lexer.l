@@ -74,6 +74,13 @@ DELAYFILE                                       { /* cout << "DELAYFILE\n"; */ r
 SDFVERSION                                      { /* cout << "SDFVERSION\n"; */ return sdfparse::Parser::make_SDFVERSION(loc_); }
 DESIGN                                          { /* cout << "DESIGN\n"; */ return sdfparse::Parser::make_DESIGN(loc_); }
 VENDOR                                          { /* cout << "VENDOR\n"; */ return sdfparse::Parser::make_VENDOR(loc_); }
+
+DATE                                          	{ /* cout << "DATE\n"; */ return sdfparse::Parser::make_DATE(loc_); }
+VOLTAGE                                         { /* cout << "VOLTAGE\n"; */ return sdfparse::Parser::make_VOLTAGE(loc_); }
+PROCESS                                         { /* cout << "PROCESS\n"; */ return sdfparse::Parser::make_PROCESS(loc_); }
+TEMPERATURE                                     { /* cout << "TEMPERATURE\n"; */ return sdfparse::Parser::make_TEMPERATURE(loc_); }
+INTERCONNECT                                    { /* cout << "INTERCONNECT\n"; */ return sdfparse::Parser::make_INTERCONNECT(loc_); }
+
 PROGRAM                                         { /* cout << "PROGRAM\n"; */ return sdfparse::Parser::make_PROGRAM(loc_); }
 VERSION                                         { /* cout << "VERSION\n"; */ return sdfparse::Parser::make_VERSION(loc_); }
 DIVIDER                                         { /* cout << "DIVIDER\n"; */ return sdfparse::Parser::make_DIVIDER(loc_); }
@@ -84,6 +91,8 @@ INSTANCE                                        { /* cout << "INSTANCE\n"; */ re
 DELAY                                           { /* cout << "DELAY\n"; */ return sdfparse::Parser::make_DELAY(loc_); }
 ABSOLUTE                                        { /* cout << "ABSOLUTE\n"; */ return sdfparse::Parser::make_ABSOLUTE(loc_); }
 IOPATH                                          { /* cout << "IOPATH\n"; */ return sdfparse::Parser::make_IOPATH(loc_); }
+iopath                                          { /* cout << "iopath\n"; */ return sdfparse::Parser::make_IOPATH(loc_); }
+
 {COLON}                                         { /* cout << "COLON\n"; */ return sdfparse::Parser::make_COLON(loc_); }
 posedge                                         { return sdfparse::Parser::make_POSEDGE(loc_); }
 negedge                                         { return sdfparse::Parser::make_NEGEDGE(loc_); }
@@ -107,7 +116,7 @@ TIMINGCHECK                                     { return sdfparse::Parser::make_
 
                                                     return sdfparse::Parser::make_Float(val, loc_); 
                                                 }
-\"({ALPHA}|{DIGIT}|{SYMBOL})+\"                 {   
+\"({ALPHA}|{DIGIT}|{SYMBOL}|{WS}|{COLON})+\"    {   
                                                     //Trim off the beginning and ending quotes
                                                     const char* begin = YYText() + 1;
                                                     const char* end = begin + YYLeng() - 2;

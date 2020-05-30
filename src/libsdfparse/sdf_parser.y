@@ -116,6 +116,12 @@
 %token <std::string> Qstring "quoted-string"
 %token EOF 0 "end-of-file"
 
+%token DATE "DATE"
+%token VOLTAGE "VOLTAGE"
+%token PROCESS "PROCESS"
+%token TEMPERATURE "TEMPERATURE"
+%token INTERCONNECT "INTERCONNECT"
+
 %type <std::string> Id "identifier"
 %type <std::string> Qid "quoted-identifier"
 %type <RealTriple> real_triple
@@ -146,6 +152,12 @@
 %type <std::vector<Cell>> cell_list
 %type <DelayFile> sdf_file
 
+%type <std::string> date
+%type <RealTriple> voltage
+%type <std::string> process
+%type <RealTriple> temperature
+%type <std::string> interconnect
+
 %start sdf_file
 
 %%
@@ -160,6 +172,10 @@ sdf_header : sdf_version                    { $$ = Header($1); }
            | sdf_header version             { $1.set_version($2); $$ = $1; }
            | sdf_header hierarchy_divider   { $1.set_divider($2); $$ = $1; }
            | sdf_header timescale           { $1.set_timescale($2); $$ = $1; }
+           | sdf_header date              	{ $$ = $1; }
+           | sdf_header voltage            	{ $$ = $1; }
+           | sdf_header process            	{ $$ = $1; }
+           | sdf_header temperature         { $$ = $1; }
            ;
 
 cell_list : cell { $$ = std::vector<Cell>(); $$.push_back($1); }
@@ -187,6 +203,19 @@ hierarchy_divider : LPAR DIVIDER Id RPAR { $$ = $3; }
 timescale : LPAR TIMESCALE Float Id RPAR { $$ = Timescale($3, $4); }
           ;
 
+	   
+date : LPAR DATE Qid RPAR { $$ = $3; }
+     ;
+	   
+voltage : LPAR VOLTAGE real_triple RPAR { $$ = RealTriple($3); }
+		;
+		
+process : LPAR PROCESS Qid RPAR { $$ = $3; }
+        ;
+		
+temperature : LPAR TEMPERATURE real_triple RPAR { $$ = RealTriple($3); }
+			;
+
 cell : LPAR CELL celltype instance timing_check RPAR { $$ = Cell($3, $4, Delay(), $5); }
      | LPAR CELL celltype instance delay RPAR { $$ = Cell($3, $4, $5, TimingCheck()); }
      | LPAR CELL celltype instance RPAR { $$ = Cell($3, $4, Delay(), TimingCheck()); }
@@ -197,6 +226,7 @@ celltype : LPAR CELLTYPE Qid RPAR { $$ = $3; }
          ;
 
 instance : LPAR INSTANCE Id RPAR { $$ = $3; }
+		 | LPAR INSTANCE RPAR { $$ = std::string(""); }
          ;
 
 timing_check : LPAR TIMINGCHECK timing_check_list RPAR { $$ = TimingCheck($3); }
@@ -226,13 +256,17 @@ delay : LPAR DELAY absolute RPAR { $$ = Delay(Delay::Type::ABSOLUTE, $3); }
 
 absolute : LPAR ABSOLUTE RPAR { $$ = std::vector<Iopath>(); } 
          | LPAR ABSOLUTE iopath_list RPAR { $$ = $3; }
+         | LPAR ABSOLUTE interconnect RPAR { $$ = std::vector<Iopath>(); }
          ;
 
 iopath_list : iopath             { $$ = std::vector<Iopath>(); $$.push_back($1); }
             | iopath_list iopath { $1.push_back($2); $$ = $1; }
             ;
 
+interconnect : LPAR INTERCONNECT Id Id real_triple RPAR { $$ = std::string(""); }
+
 iopath : LPAR IOPATH port_spec port_spec real_triple real_triple RPAR { $$ = Iopath($3, $4, $5, $6); }
+	   | LPAR IOPATH port_spec port_spec real_triple RPAR { $$ = Iopath($3, $4, $5, $5); }
        ;
 
 port_spec : Id { $$ = PortSpec($1, PortCondition::NONE); }
@@ -247,6 +281,7 @@ port_condition: POSEDGE { $$ = PortCondition::POSEDGE; }
 real_triple : LPAR Float COLON Float COLON Float RPAR { $$ = RealTriple($2, $4, $6); }
             | LPAR RPAR { $$ = RealTriple(); }
             | LPAR Float COLON COLON Float RPAR { $$ = RealTriple($2, $5); }
+			| Float COLON Float COLON Float { $$ = RealTriple($1, $3, $5); }
             ;
 
 
